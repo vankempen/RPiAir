@@ -1,14 +1,20 @@
-from flask import render_template, request
+from flask import g, render_template, request
 from RPiAir import app
 from RPiAir.omxplayer import OMXPlayer
+from RPiAir.database import database, Movie
 
-#  init Player object
+#  init player
 player = OMXPlayer()
+
+#  initialize database
+database.create_all()
+
 
 #  views
 @app.route('/')
 def show_player():
-    return render_template('player.html')
+    recentMovies = Movie.query.order_by(Movie.added_on.desc()).limit(16).all()
+    return render_template('player.html', movies=recentMovies)
 
 @app.route('/play')
 def omx_play():
