@@ -1,6 +1,7 @@
 #  user
 RPiAir/static/thumbs/*
 !RPiAir/static/thumbs/README
+!RPiAir/static/thumbs/noThumbAvailable.png
 *.db
 
 
