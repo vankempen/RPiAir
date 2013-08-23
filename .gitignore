@@ -1,3 +1,9 @@
+#  user
+RPiAir/static/thumbs/*
+!RPiAir/static/thumbs/README
+
+
+#  default
 *.py[cod]
 
 # C extensions
