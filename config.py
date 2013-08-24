@@ -5,4 +5,4 @@ SQLALCHEMY_DATABASE_URI = "sqlite:////home/patrick/Projects/RPiAir/movies.db"
 USERNAME = "admin"
 PASSWORD = "17RVof2ktEfltgFG"
 
-LIBRARY_DIR = "/home/patrick/Downloads/Series"
+LIBRARY_DIR = "/home/patrick/Downloads/Series/Workaholics"

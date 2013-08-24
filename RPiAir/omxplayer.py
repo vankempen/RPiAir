@@ -2,6 +2,7 @@ import pexpect
 import time
 from flask import jsonify
 
+
 class OMXPlayer():
     #
     CMD  = "/usr/bin/omxplayer.bin"
@@ -72,3 +73,6 @@ class OMXPlayer():
         else:
             return self.json_message("Failed to play file '%s'!'")
 
+
+#  initialize player
+player = OMXPlayer()

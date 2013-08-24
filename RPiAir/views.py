@@ -1,14 +1,12 @@
 from flask import g, render_template, request
 from RPiAir import app
-from RPiAir.omxplayer import OMXPlayer
+from RPiAir.omxplayer import player
 from RPiAir.database import database, Movie
+from RPiAir.library import library
 
-#  init player
-player = OMXPlayer()
 
 #  initialize database
 database.create_all()
-
 
 #  views
 @app.route('/')
@@ -27,3 +25,6 @@ def omx_pause():
     cmd = request.args.get('command')
     return player.run_command(cmd)
 
+@app.route('/rescan')
+def rescan_library():
+    return library.rescan()
