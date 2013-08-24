@@ -25,9 +25,7 @@ def get_thumb_cmd(ifile, ofile):
 
     """
     cmd = [THUMB_BIN] + THUMB_ARGS
-    ofile = os.path.join(THUMB_DIR, ofile)
     cmd += ['-i', ifile, '-o', ofile]
-    print cmd
     return cmd
 
 
@@ -100,9 +98,14 @@ class Library(object):
         """
         for m in Movie.query.filter(Movie.thumb == None).all():
             tname = str(uuid.uuid4()) + '.jpg'
-            p = subprocess.Popen(get_thumb_cmd(m.location, tname), \
+            tname_full = os.path.join(THUMB_DIR, tname)
+            p = subprocess.Popen(get_thumb_cmd(m.location, tname_full), \
                                  stdout=subprocess.PIPE).communicate()
-            m.thumb = tname
+            if os.path.isfile(tname_full):
+                if os.path.getsize(tname_full) > 10000:
+                    m.thumb = tname
+                else:
+                    os.remove(tname_full)
         database.session.commit()
 
         return 'Created thumbnails'
