@@ -11,7 +11,7 @@ database.create_all()
 #  views
 @app.route('/')
 def show_player():
-    recentMovies = Movie.query.order_by(Movie.added_on.desc()).limit(16).all()
+    recentMovies = Movie.query.order_by(Movie.added_on.desc()).limit(100).all()
     return render_template('player.html', movies=recentMovies, debug=app.config['DEBUG'])
 
 @app.route('/play')
@@ -28,3 +28,7 @@ def omx_pause():
 @app.route('/rescan')
 def rescan_library():
     return library.rescan()
+
+@app.route('/thumbs')
+def create_thumbs():
+    return library.delete_thumbs()

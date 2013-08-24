@@ -8,7 +8,8 @@
 		<style type="text/css">
 			body { padding-top: 60px; }
       .nav-container { text-align: center; }
-      .thumbnail { margin-bottom: 12px; }
+      .thumbnail { height: 100%; }
+      .movie { height: 175px; margin-bottom: 20px; }
       .caption { text-align: center; word-wrap: break-word; }
 		</style>
 
@@ -24,7 +25,7 @@
 				var cmd = $(this).attr("cmd")
         $.get("/run", { command: cmd }, function(data, status){
           {% if debug is sameas True %}
-				  alert("Data: " + data + "\nStatus: " + status);
+				  alert(data.message);
           {% endif %}
 				});
 			});
@@ -34,7 +35,7 @@
 				var f = $(this).attr("f")
 				$.get("/play", { filename: f }, function(data, status){
           {% if debug is sameas True %}
-				  alert("Data: " + data + "\nStatus: " + status);
+				  alert(data.message);
           {% endif %}
 				});
 			});
@@ -69,14 +70,18 @@
   <!-- video files -->
   <div class="container">
 	<div class=row">
-    <div class="col-lg-10 col-lg-offset-1">
+    <div class="col-md-10 col-md-offset-1">
       <!-- loop over all files and insert new rows every n thumbnails -->
       <div class="row">
         {% for movie in movies %}
-        <div class="col-md-3">
-          <a class="play-btn thumbnail" f="{{ movie.location }}"><img src="{{ url_for('static', filename='thumbs/' + (movie.thumb|default('noThumbAvailable.png', True))) }}" /><div class="caption">{{ movie.title }}</div></a>
+        <div class="col-md-3 movie">
+          <a class="play-btn thumbnail" f="{{ movie.location }}"><img src="{{ url_for('static', filename='thumbs/' + (movie.thumb|default('noThumbAvailable.png', True))) }}" /><div class="caption">{{ movie.title|truncate(30, True) }}</div></a>
         </div>
-        {% endfor %}
+        {% else %}
+        <div class="col-md-6 col-md-offset-3" style="text-align: center">
+        Unfortunately there are currently no files in the library! Try <a href="/rescan">rescanning</a> or set another path in your config file.
+      </div>
+      {% endfor %}
       </div>
     </div>
   </div>

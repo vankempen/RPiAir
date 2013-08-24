@@ -1,8 +1,34 @@
 import os
+import subprocess
 import time
+import uuid
 
+from flask import url_for
 from RPiAir import app
 from RPiAir.database import database, Movie
+
+
+#  directory for thumbnails
+THUMB_DIR = './RPiAir/static/thumbs/'
+
+#  program used for making thumbnails
+THUMB_BIN = '/usr/bin/ffmpegthumbnailer'
+THUMB_ARGS = '-q 90 -t 30% -s 256'.split(' ')
+
+#  command to generate thumbnails (inputfile still has to be added
+def get_thumb_cmd(ifile, ofile):
+    """returns command to generate thumbnails as list
+
+    :ifile: inputfile
+    :ofile: outputfile
+    :returns: list with command and args to use in subprocess.Popen
+
+    """
+    cmd = [THUMB_BIN] + THUMB_ARGS
+    ofile = os.path.join(THUMB_DIR, ofile)
+    cmd += ['-i', ifile, '-o', ofile]
+    print cmd
+    return cmd
 
 
 class Library(object):
@@ -38,9 +64,10 @@ class Library(object):
                         yield dirpath, f
                         continue
 
-    def rescan(self):
+    def rescan(self, thumbs=True):
         """rescans root recursively, adds movies to db and removes non existing ones from db
 
+        :thumbs: also generate thumbnails
         :returns: if completed
 
         """
@@ -52,13 +79,43 @@ class Library(object):
         database.session.commit()
 
         #  remove obselete items from database
-        Movie.query.filter(Movie.checked_on != timestamp).delete()
+        for m in Movie.query.filter(Movie.checked_on != timestamp).all():
+            if m.thumb is not None:
+                thumb = os.path.join(THUMB_DIR, m.thumb)
+                if os.path.isfile(thumb):
+                    os.remove(thumb)
+            database.session.delete(m)
         database.session.commit()
+
+        if thumbs:
+            _ = self.create_thumbs()
 
         return 'Rescanned'
 
+    def create_thumbs(self):
+        """Selects rows from database where no thumbnail is available and creates one in the thumbs directory
 
+        :returns: @todo
 
+        """
+        for m in Movie.query.filter(Movie.thumb == None).all():
+            tname = str(uuid.uuid4()) + '.jpg'
+            p = subprocess.Popen(get_thumb_cmd(m.location, tname), \
+                                 stdout=subprocess.PIPE).communicate()
+            m.thumb = tname
+        database.session.commit()
+
+        return 'Created thumbnails'
+
+    def delete_thumbs(self):
+        for m in Movie.query.all():
+            if m.thumb is not None:
+                thumb = os.path.join(THUMB_DIR, m.thumb)
+                if os.path.isfile(thumb):
+                    os.remove(thumb)
+            m.thumb = None
+        database.session.commit()
+        return "Consider it done"
 
 
 #  initialize library

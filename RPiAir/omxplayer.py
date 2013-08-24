@@ -64,7 +64,10 @@ class OMXPlayer():
         player = self.get_currentPlayer() #  first check if not already playing
         if player:
             _ = self.run_command('exit')
-        new_player = pexpect.spawn(' '.join([OMXPlayer.CMD, OMXPlayer.ARGS, filename]))
+        try:
+            new_player = pexpect.spawn(' '.join([OMXPlayer.CMD, OMXPlayer.ARGS, filename]))
+        except pexpect.ExceptionPexpect:
+            return self.json_message("Command '%s' not found! Please check if installed correctly." % OMXPlayer.CMD)
 
         time.sleep(0.5) #  make sure omxplayer not immediately exits
         if new_player.isalive():
