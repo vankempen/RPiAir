@@ -16,7 +16,9 @@
 		  $(".cmd-btn").click(function(){
 				var cmd = $(this).attr("cmd")
         $.get("/run", { command: cmd }, function(data, status){
+          {% if debug is sameas True %}
 				  alert("Data: " + data + "\nStatus: " + status);
+          {% endif %}
 				});
 			});
 
@@ -24,7 +26,9 @@
 		  $(".play-btn").click(function(){
 				var f = $(this).attr("f")
 				$.get("/play", { filename: f }, function(data, status){
+          {% if debug is sameas True %}
 				  alert("Data: " + data + "\nStatus: " + status);
+          {% endif %}
 				});
 			});
 		});
@@ -36,9 +40,11 @@
 	<div class="navbar navbar-inverse navbar-fixed-top">
 		<div class="navbar-inner">
 			<div style="text-align: center;">
+        <!-- subtitles not implemented yet
 				<div class="btn-group">
           <button class="cmd-btn btn" cmd="toggleSubtitle"><i class="icon-align-justify"></i></button>
         </div>
+        -->
 				<div class="btn-group">
 					<button class="cmd-btn btn" cmd="seek-600"><i class="icon-fast-backward"></i></button>
 					<button class="cmd-btn btn" cmd="seek-30"><i class="icon-step-backward"></i></button>

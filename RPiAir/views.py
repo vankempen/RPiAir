@@ -12,7 +12,7 @@ database.create_all()
 @app.route('/')
 def show_player():
     recentMovies = Movie.query.order_by(Movie.added_on.desc()).limit(16).all()
-    return render_template('player.html', movies=recentMovies)
+    return render_template('player.html', movies=recentMovies, debug=app.config['DEBUG'])
 
 @app.route('/play')
 def omx_play():
