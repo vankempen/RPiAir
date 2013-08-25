@@ -3,7 +3,7 @@ import subprocess
 import time
 import uuid
 
-from flask import url_for
+from flask import jsonify, url_for
 from RPiAir import app
 from RPiAir.database import database, Movie
 
@@ -88,7 +88,7 @@ class Library(object):
         if thumbs:
             _ = self.create_thumbs()
 
-        return 'Rescanned'
+        return jsonify(message='Rescanned')
 
     def create_thumbs(self):
         """Selects rows from database where no thumbnail is available and creates one in the thumbs directory

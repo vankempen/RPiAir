@@ -8,6 +8,10 @@ from RPiAir.library import library
 #  initialize database
 database.create_all()
 
+def get_urlData(r):
+    """retuns dict with parsed data from url """
+    return eval(r.args.get('data'))
+
 #  views
 @app.route('/')
 def show_player():
@@ -17,12 +21,12 @@ def show_player():
 @app.route('/play')
 def omx_play():
     #  spawn new process and store in cache
-    filename = request.args.get('f')
+    filename = get_urlData(request)['f']
     return player.play_file(filename)
 
 @app.route('/run')
 def omx_run():
-    cmd = request.args.get('cmd')
+    cmd = get_urlData(request)['cmd']
     return player.run_command(cmd)
 
 @app.route('/rescan')
