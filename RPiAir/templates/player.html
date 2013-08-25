@@ -4,42 +4,44 @@
 		<title>RPiAir</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Styles -->
-		<style type="text/css">
-			body { padding-top: 60px; }
-      .nav-container { text-align: center; }
-      .thumbnail { height: 100%; }
-      .movie { height: 175px; margin-bottom: 20px; }
-      .caption { text-align: center; word-wrap: break-word; }
-		</style>
-
     <!-- Bootstrap -->
 		<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" media="screen">
 
+    <!-- Custom styles -->
+		<style type="text/css">
+			body { padding: 60px 0px 40px; }
+      .nav-container { text-align: center; }
+      .thumbnail { margin-bottom: 12px; text-align: center; }
+      .thumbnail img { padding: 7px 7px 0px; }
+      .caption { text-align: center; word-wrap: break-word; }
+		</style>
+
+
     <!-- jQuery -->
 		<script src="{{ url_for('static', filename='js/jquery-current.min.js') }}"></script>
+
 		<script type=text/javascript>
+      function ajaxCall(url, className, attrs){
+        $(className).click(function(){
+          for(var a in attrs){
+            attrs[a] = $(this).attr(a)
+          }
+          $.get(url, attrs, function(data, status){
+            {% if debug is sameas True %}
+            alert(data.message);
+            {% endif %}
+          });
+        });
+      }
+
 		$(document).ready(function(){
 			//command buttons
-		  $(".cmd-btn").click(function(){
-				var cmd = $(this).attr("cmd")
-        $.get("/run", { command: cmd }, function(data, status){
-          {% if debug is sameas True %}
-				  alert(data.message);
-          {% endif %}
-				});
-			});
+      ajaxCall('/run', '.cmd-btn', 'cmd')
 
 			//video buttons
-		  $(".play-btn").click(function(){
-				var f = $(this).attr("f")
-				$.get("/play", { filename: f }, function(data, status){
-          {% if debug is sameas True %}
-				  alert(data.message);
-          {% endif %}
-				});
-			});
+      ajaxCall('/play', '.play-btn', 'f')
 		});
+
 		</script>
 	</head>
 	<body>
@@ -75,10 +77,16 @@
       <div class="row">
         {% for movie in movies %}
         <div class="col-md-3 movie">
-          <a class="play-btn thumbnail" f="{{ movie.location }}"><img src="{{ url_for('static', filename='thumbs/' + (movie.thumb|default('noThumbAvailable.png', True))) }}" /><div class="caption">{{ movie.title|truncate(30, True) }}</div></a>
+          <div class="thumbnail">
+            <img class="play-btn" src="{{ url_for('static', filename='thumbs/' + (movie.thumb|default('noThumbAvailable.png', True))) }}" /><div class="caption">{{ movie.title|truncate(30, True) }}</div>
+          </div>
         </div>
+          {% if loop.index is divisibleby 4 %}
+      </div>
+      <div class="row">
+          {% endif %}
         {% else %}
-        <div class="col-md-6 col-md-offset-3" style="text-align: center">
+        <div class="col-md-6 col-md-offset-3">
         Unfortunately there are currently no files in the library! Try <a href="/rescan">rescanning</a> or set another path in your config file.
       </div>
       {% endfor %}
@@ -86,6 +94,6 @@
     </div>
   </div>
   </div>
-	<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+  <!-- <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script> -->
 	</body>
 </html>
