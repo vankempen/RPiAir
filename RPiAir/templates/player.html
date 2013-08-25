@@ -13,7 +13,7 @@
       .nav-container { text-align: center; }
       .thumbnail { margin-bottom: 12px; text-align: center; }
       .thumbnail img { padding: 7px 7px 0px; }
-      .caption { text-align: center; word-wrap: break-word; }
+      .caption { line-height: 1.2em; max-height: 3.0em; text-align: center; word-wrap: break-word; overflow: hidden; }
 		</style>
 
 
@@ -78,7 +78,7 @@
         {% for movie in movies %}
         <div class="col-md-3 movie">
           <div class="thumbnail">
-            <img class="play-btn" src="{{ url_for('static', filename='thumbs/' + (movie.thumb|default('noThumbAvailable.png', True))) }}" /><div class="caption">{{ movie.title|truncate(30, True) }}</div>
+            <img class="play-btn" src="{{ url_for('static', filename='thumbs/' + (movie.thumb|default('noThumbAvailable.png', True))) }}" /><div class="caption">{{ movie.title }}</div>
           </div>
         </div>
           {% if loop.index is divisibleby 4 %}
