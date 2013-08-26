@@ -6,7 +6,7 @@ from flask import jsonify
 class OMXPlayer():
     #
     CMD  = "/usr/bin/omxplayer.bin"
-    ARGS = "-o hdmi -b"
+    ARGS = "-o hdmi -b".split(' ')
     KEYS = {
             'decrSpeed': '1',
             'incrSpeed': '2',
@@ -65,7 +65,7 @@ class OMXPlayer():
         if player:
             _ = self.run_command('exit')
         try:
-            new_player = pexpect.spawn(' '.join([OMXPlayer.CMD, OMXPlayer.ARGS, filename]))
+            new_player = pexpect.spawn(OMXPlayer.CMD, OMXPlayer.ARGS + [filename])
         except pexpect.ExceptionPexpect:
             return self.json_message("Command '%s' not found! Please check if installed correctly." % OMXPlayer.CMD)
 
@@ -74,7 +74,7 @@ class OMXPlayer():
             self.set_currentPlayer(new_player)
             return self.json_message("Successfully started playing file '%s'!" % filename)
         else:
-            return self.json_message("Failed to play file '%s'!'")
+            return self.json_message("Failed to play file '%s'!'" % filename)
 
 
 #  initialize player
