@@ -23,12 +23,23 @@
     <script type=text/javascript>
 
       /** ajax call to server */
-      function ajaxCall(url){
+      function ajaxCall(url, handler){
         $.getJSON(url, function(data){
+            if (handler != undefined) {
+              handler(data)
+            }
             {% if debug is sameas True %}
-            alert(data.message);
+            if (data.message != undefined) {
+              alert(data.message);
+            }
             {% endif %}
         })
+      }
+
+      /** reload the #movies-pane with new set of movies */
+      function reloadMovies(data) {
+        var movies = create_movieHTML(data.movies);
+        $('#movies').html(movies);
       }
 
       /** return html code for all movies in list l */
@@ -65,11 +76,14 @@
             ajaxCall(url);
           })
 
-          /** load initial library */
-          $.getJSON('/library/get', {offset: 0}, function(data){
-            movies = create_movieHTML(data.movies);
-            $('#movies').html(movies);
+          $('body').on('click', '.lib-btn', function(){
+            $('#movies').html('<div class="col-md-2 col-md-offset-5" style="text-align: center;"><img alt="loading" src="{{ url_for('static', filename='img/loader.gif') }}" /></div>') 
+            var url = $(this).attr('url');
+            ajaxCall(url, reloadMovies);
           })
+
+          /** load initial library */
+          ajaxCall('/library/offset/0', reloadMovies)
       });
 
     </script>
@@ -108,7 +122,7 @@
 
   <!-- library buttons -->
   <div class="navbar navbar-default navbar-fixed-bottom" style="min-height: 25px; border-top: 1px solid #ccc;">
-    <button class="cmd-btn btn btn-default navbar-btn btn-xs navbar-right" style="margin: 2px 0px;" url="/library/rescan"><span class="glyphicon glyphicon-refresh"></span></button>
+    <button class="lib-btn btn btn-default navbar-btn btn-xs navbar-right" style="margin: 2px 0px;" url="/library/rescan"><span class="glyphicon glyphicon-refresh"></span></button>
   </div>
   </body>
 </html>

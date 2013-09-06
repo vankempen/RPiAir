@@ -44,21 +44,23 @@ def video_position(direction, amount):
 """
 Library commands
 """
-@app.route('/library/get')
-def get_library():
-    try:
-        offset = int(request.args.get('offset'))
-    except (ValueError, TypeError):
-        offset = 0
+@app.route('/library/offset/<int:offset>')
+def get_library(offset):
     movies = Movie.query.order_by(Movie.added_on.desc()).slice(offset, 20)
+    return jsonify(movies=[m.serialize() for m in movies.all()])
+
+@app.route('/library/search/<qry>')
+def search_library(qry):
+    movies = Movie.query.filter(database.or_(Movie.title.like('%' + qry + '%'), Movie.location.like('%' + qry + '%'))).order_by(Movie.added_on.desc())
     return jsonify(movies=[m.serialize() for m in movies.all()])
 
 @app.route('/library/rescan')
 def rescan_library():
-    return library.rescan()
+    library.rescan()
+    return get_library(0)
 
 
 """ DEBUG """
-@app.route('/thumbs')
+@app.route('/thumbs/delete')
 def create_thumbs():
     return library.delete_thumbs()
