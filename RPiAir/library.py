@@ -1,15 +1,18 @@
+from hashlib import md5
 import os
 import subprocess
 import time
-import uuid
 
 from flask import jsonify, url_for
 from RPiAir import app
 from RPiAir.database import database, Movie
 
 
-#  directory for thumbnails
-THUMB_DIR = './RPiAir/static/thumbs/'
+#  Supported movie extensions for OMXPlayer
+MOVIE_EXTS = ['.mp4', '.avi', '.mkv', '.mov', '.mpg', '.flv', '.m4v']
+
+THUMB_DIR = './RPiAir/static/thumbs/' #  directory for thumbnails
+THUMB_EXT = '.jpg' #  image extension for thumbnails
 
 #  program used for making thumbnails
 THUMB_BIN = '/usr/bin/ffmpegthumbnailer'
@@ -30,13 +33,9 @@ def get_thumb_cmd(ifile, ofile):
 
 
 class Library(object):
-    """Docstring for Library. """
-
-    #  Supported movie extensions for OMXPlayer
-    movieExtensions = ['.mp4', '.avi', '.mkv', '.mov', '.mpg', '.flv', '.m4v']
+    """Handler for movie library"""
 
     def __init__(self, root):
-        """@todo: to be defined1. """
         self.root = root
 
     def movies_in_path(self, path=None, exts=None):
@@ -52,7 +51,7 @@ class Library(object):
             path = self.root
 
         if exts is None:
-            exts = Library.movieExtensions
+            exts = MOVIE_EXTS
 
         for dirpath, _, files in os.walk(path):
             for f in files:
@@ -78,8 +77,8 @@ class Library(object):
 
         #  remove obselete items from database
         for m in Movie.query.filter(Movie.checked_on != timestamp).all():
-            if m.thumb is not None:
-                thumb = os.path.join(THUMB_DIR, m.thumb)
+            if m.thumb is not False:
+                thumb = os.path.join(THUMB_DIR, m.hash_id + THUMB_EXT)
                 if os.path.isfile(thumb):
                     os.remove(thumb)
             database.session.delete(m)
@@ -96,27 +95,27 @@ class Library(object):
         :returns: @todo
 
         """
-        for m in Movie.query.filter(Movie.thumb == None).all():
-            tname = str(uuid.uuid4()) + '.jpg'
+        for m in Movie.query.filter(Movie.thumb == False).all():
+            tname = m.hash_id + THUMB_EXT
             tname_full = os.path.join(THUMB_DIR, tname)
             p = subprocess.Popen(get_thumb_cmd(m.location, tname_full), \
                                  stdout=subprocess.PIPE).communicate()
             if os.path.isfile(tname_full):
                 if os.path.getsize(tname_full) > 10000:
-                    m.thumb = tname
+                    m.thumb = True
                 else:
                     os.remove(tname_full)
         database.session.commit()
-
         return 'Created thumbnails'
 
     def delete_thumbs(self):
+        """ for debugging """
         for m in Movie.query.all():
-            if m.thumb is not None:
+            if m.thumb is True:
                 thumb = os.path.join(THUMB_DIR, m.thumb)
                 if os.path.isfile(thumb):
                     os.remove(thumb)
-            m.thumb = None
+            m.thumb = False
         database.session.commit()
         return "Consider it done"
 

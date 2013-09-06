@@ -1,2 +1,3 @@
+pexpect
 flask
 flask-sqlalchemy
